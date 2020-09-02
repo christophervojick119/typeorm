@@ -39,11 +39,6 @@ maintainable applications the most productive way.
 TypeORM is highly influenced by other ORMs, such as [Hibernate](http://hibernate.org/orm/),
  [Doctrine](http://www.doctrine-project.org/) and [Entity Framework](https://www.asp.net/entity-framework).
  
-## Sponsors
- 
-TypeORM is being sponsored by the following partner:
-<a href="https://tracking.gitads.io/?repo=typeorm"> <img src="https://images.gitads.io/typeorm" alt="GitAds" style="width: 100%; margin-top: 20px;"/> </a>
-
 ## Features
 
 * supports both [DataMapper](./docs/active-record-data-mapper.md#what-is-the-data-mapper-pattern) and [ActiveRecord](./docs/active-record-data-mapper.md#what-is-the-active-record-pattern) (your choice)
