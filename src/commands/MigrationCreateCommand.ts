@@ -45,7 +45,7 @@ export class MigrationCreateCommand implements yargs.CommandModule {
             const timestamp = new Date().getTime();
             const fileContent = MigrationCreateCommand.getTemplate(args.name as any, timestamp);
             const filename = timestamp + "-" + args.name + ".ts";
-            let directory: string = args.dir;
+            let directory = args.dir as string;
 
             // if directory is not set then try to open tsconfig and find default path there
             if (!directory) {
@@ -55,7 +55,7 @@ export class MigrationCreateCommand implements yargs.CommandModule {
                         configName: args.config as any
                     });
                     const connectionOptions = await connectionOptionsReader.get(args.connection as any);
-                    directory = connectionOptions.cli ? connectionOptions.cli.migrationsDir : undefined;
+                    directory = connectionOptions.cli ? (connectionOptions.cli.migrationsDir || "") : "";
                 } catch (err) { }
             }
 
