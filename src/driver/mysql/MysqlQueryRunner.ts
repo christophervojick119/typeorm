@@ -1296,6 +1296,8 @@ export class MysqlQueryRunner extends BaseQueryRunner implements QueryRunner {
                     tableColumn.name = dbColumn["COLUMN_NAME"];
                     tableColumn.type = dbColumn["DATA_TYPE"].toLowerCase();
 
+                    tableColumn.zerofill = dbColumn["COLUMN_TYPE"].indexOf("zerofill") !== -1;
+                    tableColumn.unsigned = tableColumn.zerofill ? true : dbColumn["COLUMN_TYPE"].indexOf("unsigned") !== -1;
                     if (this.driver.withWidthColumnTypes.indexOf(tableColumn.type as ColumnType) !== -1) {
                         const width = dbColumn["COLUMN_TYPE"].substring(dbColumn["COLUMN_TYPE"].indexOf("(") + 1, dbColumn["COLUMN_TYPE"].indexOf(")"));
                         tableColumn.width = width && !this.isDefaultColumnWidth(table, tableColumn, parseInt(width)) ? parseInt(width) : undefined;
@@ -1332,8 +1334,6 @@ export class MysqlQueryRunner extends BaseQueryRunner implements QueryRunner {
                     tableColumn.isPrimary = dbPrimaryKeys.some(dbPrimaryKey => {
                         return this.driver.buildTableName(dbPrimaryKey["TABLE_NAME"], undefined, dbPrimaryKey["TABLE_SCHEMA"]) === tableFullName && dbPrimaryKey["COLUMN_NAME"] === tableColumn.name;
                     });
-                    tableColumn.zerofill = dbColumn["COLUMN_TYPE"].indexOf("zerofill") !== -1;
-                    tableColumn.unsigned = tableColumn.zerofill ? true : dbColumn["COLUMN_TYPE"].indexOf("unsigned") !== -1;
                     tableColumn.isGenerated = dbColumn["EXTRA"].indexOf("auto_increment") !== -1;
                     if (tableColumn.isGenerated)
                         tableColumn.generationStrategy = "increment";
@@ -1692,6 +1692,37 @@ export class MysqlQueryRunner extends BaseQueryRunner implements QueryRunner {
     protected async getVersion(): Promise<string> {
         const result = await this.query(`SELECT VERSION() AS \`version\``);
         return result[0]["version"];
+    }
+
+    /**
+     * Checks if column display width is by default.
+     */
+    protected isDefaultColumnWidth(table: Table, column: TableColumn, width: number): boolean {
+        // if table have metadata, we check if length is specified in column metadata
+        if (this.connection.hasMetadata(table.name)) {
+            const metadata = this.connection.getMetadata(table.name);
+            const columnMetadata = metadata.findColumnWithDatabaseName(column.name);
+            if (columnMetadata && columnMetadata.width)
+                return false;
+        }
+
+        const defaultWidthForType = this.connection.driver.dataTypeDefaults
+            && this.connection.driver.dataTypeDefaults[column.type]
+            && this.connection.driver.dataTypeDefaults[column.type].width;
+
+        if (defaultWidthForType) {
+            // In MariaDB & MySQL 5.7, the default widths of certain numeric types are 1 less than
+            // the usual defaults when the column is unsigned.
+            const typesWithReducedUnsignedDefault = ["int", "tinyint", "smallint", "mediumint"];
+            const needsAdjustment = typesWithReducedUnsignedDefault.indexOf(column.type) !== -1;
+            if (column.unsigned && needsAdjustment) {
+                return (defaultWidthForType - 1) === width;
+            } else {
+                return defaultWidthForType === width;
+            }
+        }
+
+        return false;
     }
 
 }
