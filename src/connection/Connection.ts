@@ -36,7 +36,6 @@ import {EntitySchema} from "../";
 import {SqlServerDriver} from "../driver/sqlserver/SqlServerDriver";
 import {MysqlDriver} from "../driver/mysql/MysqlDriver";
 import {ObjectUtils} from "../util/ObjectUtils";
-import {PromiseUtils} from "../";
 import {IsolationLevel} from "../driver/types/IsolationLevel";
 import {AuroraDataApiDriver} from "../driver/aurora-data-api/AuroraDataApiDriver";
 import {DriverUtils} from "../driver/DriverUtils";
@@ -268,7 +267,10 @@ export class Connection {
                     if (metadata.database && databases.indexOf(metadata.database) === -1)
                         databases.push(metadata.database);
                 });
-                await PromiseUtils.runInSequence(databases, database => queryRunner.clearDatabase(database));
+
+                for (const database of databases) {
+                    await queryRunner.clearDatabase(database);
+                }
             } else {
                 await queryRunner.clearDatabase();
             }
