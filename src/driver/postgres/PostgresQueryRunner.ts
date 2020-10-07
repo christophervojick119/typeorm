@@ -1412,7 +1412,7 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
             `INNER JOIN "pg_class" "t" ON "t"."oid" = "cnst"."conrelid" ` +
             `INNER JOIN "pg_namespace" "ns" ON "ns"."oid" = "cnst"."connamespace" ` +
             `LEFT JOIN "pg_attribute" "a" ON "a"."attrelid" = "cnst"."conrelid" AND "a"."attnum" = ANY ("cnst"."conkey") ` +
-            `WHERE "t"."relkind" = 'r' AND (${constraintsCondition})`;
+            `WHERE "t"."relkind" IN ('r', 'p') AND (${constraintsCondition})`;
 
         const indicesSql = `SELECT "ns"."nspname" AS "table_schema", "t"."relname" AS "table_name", "i"."relname" AS "constraint_name", "a"."attname" AS "column_name", ` +
             `CASE "ix"."indisunique" WHEN 't' THEN 'TRUE' ELSE'FALSE' END AS "is_unique", pg_get_expr("ix"."indpred", "ix"."indrelid") AS "condition", ` +
@@ -1424,7 +1424,7 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
             `INNER JOIN "pg_class" "i" ON "i"."oid" = "ix"."indexrelid" ` +
             `INNER JOIN "pg_type" "types" ON "types"."oid" = "a"."atttypid" ` +
             `LEFT JOIN "pg_constraint" "cnst" ON "cnst"."conname" = "i"."relname" ` +
-            `WHERE "t"."relkind" = 'r' AND "cnst"."contype" IS NULL AND (${constraintsCondition})`;
+            `WHERE "t"."relkind" IN ('r', 'p') AND "cnst"."contype" IS NULL AND (${constraintsCondition})`;
 
         const foreignKeysCondition = tableNames.map(tableName => {
             let [schema, name] = tableName.split(".");
@@ -1434,6 +1434,10 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
             }
             return `("ns"."nspname" = '${schema}' AND "cl"."relname" = '${name}')`;
         }).join(" OR ");
+
+        const hasRelispartitionColumn = await this.hasSupportForPartitionedTables();
+        const isPartitionCondition = hasRelispartitionColumn ? ` AND "cl"."relispartition" = 'f'` : "";
+
         const foreignKeysSql = `SELECT "con"."conname" AS "constraint_name", "con"."nspname" AS "table_schema", "con"."relname" AS "table_name", "att2"."attname" AS "column_name", ` +
             `"ns"."nspname" AS "referenced_table_schema", "cl"."relname" AS "referenced_table_name", "att"."attname" AS "referenced_column_name", "con"."confdeltype" AS "on_delete", ` +
             `"con"."confupdtype" AS "on_update", "con"."condeferrable" AS "deferrable", "con"."condeferred" AS "deferred" ` +
@@ -1449,7 +1453,7 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
             `WHERE "con1"."contype" = 'f' AND (${foreignKeysCondition}) ` +
             `) "con" ` +
             `INNER JOIN "pg_attribute" "att" ON "att"."attrelid" = "con"."confrelid" AND "att"."attnum" = "con"."child" ` +
-            `INNER JOIN "pg_class" "cl" ON "cl"."oid" = "con"."confrelid" ` +
+            `INNER JOIN "pg_class" "cl" ON "cl"."oid" = "con"."confrelid" ${isPartitionCondition}` +
             `INNER JOIN "pg_namespace" "ns" ON "cl"."relnamespace" = "ns"."oid" ` +
             `INNER JOIN "pg_attribute" "att2" ON "att2"."attrelid" = "con"."conrelid" AND "att2"."attnum" = "con"."parent"`;
         const [dbTables, dbColumns, dbConstraints, dbIndices, dbForeignKeys]: ObjectLiteral[][] = await Promise.all([
@@ -2125,4 +2129,11 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
         return c;
     }
 
+    /**
+     * Checks if the PostgreSQL server has support for partitioned tables
+     */
+    protected async hasSupportForPartitionedTables() {
+        const result = await this.query(`SELECT TRUE FROM information_schema.columns WHERE table_name = 'pg_class' and column_name = 'relispartition'`);
+        return result.length ? true : false;
+    }
 }
