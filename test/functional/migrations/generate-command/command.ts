@@ -11,7 +11,6 @@ describe("migrations > generate command", () => {
         schemaCreate: false,
         dropSchema: true,
         entities: [Post, Category],
-        logging: true,
         schema: "public",
     }));
     // beforeEach(() => reloadTestingDatabases(connections));
