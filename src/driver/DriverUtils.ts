@@ -23,7 +23,7 @@ export class DriverUtils {
             }
 
             for (const key of Object.keys(urlDriverOptions)) {
-                if (typeof urlDriverOptions[key] === 'undefined') {
+                if (typeof urlDriverOptions[key] === "undefined") {
                     delete urlDriverOptions[key];
                 }
             }
