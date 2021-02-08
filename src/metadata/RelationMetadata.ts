@@ -160,6 +160,13 @@ export class RelationMetadata {
     deferrable?: DeferrableType;
 
     /**
+     * Indicates whether foreign key constraints will be created for join columns.
+     * Can be used only for many-to-one and owner one-to-one relations.
+     * Defaults to true.
+     */
+    createForeignKeyConstraints: boolean = true;
+
+    /**
      * Gets the property's type to which this relation is applied.
      *
      * For example for @ManyToMany(type => Category) in Post, target will be Category.
@@ -301,6 +308,7 @@ export class RelationMetadata {
         this.onDelete = args.options.onDelete;
         this.onUpdate = args.options.onUpdate;
         this.deferrable = args.options.deferrable;
+        this.createForeignKeyConstraints = args.options.createForeignKeyConstraints === false ? false : true;
         this.isEager = args.options.eager || false;
         this.persistenceEnabled = args.options.persistence === false ? false : true;
         this.orphanedRowAction = args.options.orphanedRowAction || "nullify";
@@ -495,8 +503,15 @@ export class RelationMetadata {
      */
     registerForeignKeys(...foreignKeys: ForeignKeyMetadata[]) {
         this.foreignKeys.push(...foreignKeys);
-        this.joinColumns = this.foreignKeys[0] ? this.foreignKeys[0].columns : [];
-        this.inverseJoinColumns = this.foreignKeys[1] ? this.foreignKeys[1].columns : [];
+    }
+
+    /**
+     * Registers given join columns in the relation.
+     * This builder method should be used to register join column in the relation.
+     */
+    registerJoinColumns(joinColumns: ColumnMetadata[] = [], inverseJoinColumns: ColumnMetadata[] = []) {
+        this.joinColumns = joinColumns;
+        this.inverseJoinColumns = inverseJoinColumns;
         this.isOwning = this.isManyToOne || ((this.isManyToMany || this.isOneToOne) && this.joinColumns.length > 0);
         this.isOneToOneOwner = this.isOneToOne && this.isOwning;
         this.isOneToOneNotOwner = this.isOneToOne && !this.isOwning;
