@@ -747,10 +747,7 @@ export class PostgresDriver implements Driver {
         } else if (typeof defaultValue === "string") {
             return `'${defaultValue}'${arrayCast}`;
 
-        } else if (defaultValue === null) {
-            return `null`;
-
-        } else if (typeof defaultValue === "object") {
+        } else if (typeof defaultValue === "object" && defaultValue !== null) {
             return `'${JSON.stringify(defaultValue)}'`;
 
         } else {
@@ -872,12 +869,12 @@ export class PostgresDriver implements Driver {
             if (!tableColumn)
                 return false; // we don't need new columns, we only need exist and changed
 
-            return tableColumn.name !== columnMetadata.databaseName
+            const isColumnChanged = tableColumn.name !== columnMetadata.databaseName
                 || tableColumn.type !== this.normalizeType(columnMetadata)
                 || tableColumn.length !== columnMetadata.length
                 || tableColumn.precision !== columnMetadata.precision
                 || (columnMetadata.scale !== undefined && tableColumn.scale !== columnMetadata.scale)
-                || (tableColumn.comment || "") !== columnMetadata.comment
+                || tableColumn.comment !== columnMetadata.comment
                 || (!tableColumn.isGenerated && this.lowerDefaultValueIfNecessary(this.normalizeDefault(columnMetadata)) !== tableColumn.default) // we included check for generated here, because generated columns already can have default values
                 || tableColumn.isPrimary !== columnMetadata.isPrimary
                 || tableColumn.isNullable !== columnMetadata.isNullable
@@ -886,6 +883,29 @@ export class PostgresDriver implements Driver {
                 || tableColumn.isGenerated !== columnMetadata.isGenerated
                 || (tableColumn.spatialFeatureType || "").toLowerCase() !== (columnMetadata.spatialFeatureType || "").toLowerCase()
                 || tableColumn.srid !== columnMetadata.srid;
+
+            // DEBUG SECTION
+            // if (isColumnChanged) {
+            //     console.log("table:", columnMetadata.entityMetadata.tableName);
+            //     console.log("name:", tableColumn.name, columnMetadata.databaseName);
+            //     console.log("type:", tableColumn.type, this.normalizeType(columnMetadata));
+            //     console.log("length:", tableColumn.length, columnMetadata.length);
+            //     console.log("precision:", tableColumn.precision, columnMetadata.precision);
+            //     console.log("scale:", tableColumn.scale, columnMetadata.scale);
+            //     console.log("comment:", tableColumn.comment, columnMetadata.comment);
+            //     console.log("enum:", tableColumn.enum && columnMetadata.enum && !OrmUtils.isArraysEqual(tableColumn.enum, columnMetadata.enum.map(val => val + "")));
+            //     console.log("onUpdate:", tableColumn.onUpdate, columnMetadata.onUpdate);
+            //     console.log("isPrimary:", tableColumn.isPrimary, columnMetadata.isPrimary);
+            //     console.log("isNullable:", tableColumn.isNullable, columnMetadata.isNullable);
+            //     console.log("isUnique:", tableColumn.isUnique, this.normalizeIsUnique(columnMetadata));
+            //     console.log("isGenerated:", tableColumn.isGenerated, columnMetadata.isGenerated);
+            //     console.log("isGenerated 2:", !tableColumn.isGenerated && this.lowerDefaultValueIfNecessary(this.normalizeDefault(columnMetadata)) !== tableColumn.default);
+            //     console.log("spatialFeatureType:", (tableColumn.spatialFeatureType || "").toLowerCase(), (columnMetadata.spatialFeatureType || "").toLowerCase());
+            //     console.log("srid", tableColumn.srid, columnMetadata.srid);
+            //     console.log("==========================================");
+            // }
+
+            return isColumnChanged
         });
     }
 
@@ -898,6 +918,7 @@ export class PostgresDriver implements Driver {
             return i % 2 === 1 ? v : v.toLowerCase();
         }).join(`'`);
     }
+
     /**
      * Returns true if driver supports RETURNING / OUTPUT statement.
      */
