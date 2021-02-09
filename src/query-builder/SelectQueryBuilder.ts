@@ -960,26 +960,21 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
     /**
      * Sets locking mode.
      */
-    setLock(lockMode: "optimistic", lockVersion: number): this;
+    setLock(lockMode: "optimistic", lockVersion: number | Date): this;
 
     /**
      * Sets locking mode.
      */
-    setLock(lockMode: "optimistic", lockVersion: Date): this;
+    setLock(lockMode: "pessimistic_read"|"pessimistic_write"|"dirty_read"|"pessimistic_partial_write"|"pessimistic_write_or_fail"|"for_no_key_update", lockVersion?: undefined, lockTables?: string[]): this;
 
     /**
      * Sets locking mode.
      */
-    setLock(lockMode: "pessimistic_read"|"pessimistic_write"|"dirty_read"|"pessimistic_partial_write"|"pessimistic_write_or_fail"|"for_no_key_update"): this;
-
-    /**
-     * Sets locking mode.
-     */
-    setLock(lockMode: "optimistic"|"pessimistic_read"|"pessimistic_write"|"dirty_read"|"pessimistic_partial_write"|"pessimistic_write_or_fail"|"for_no_key_update", lockVersion?: number|Date): this {
+    setLock(lockMode: "optimistic"|"pessimistic_read"|"pessimistic_write"|"dirty_read"|"pessimistic_partial_write"|"pessimistic_write_or_fail"|"for_no_key_update", lockVersion?: number|Date, lockTables?: string[]): this {
         this.expressionMap.lockMode = lockMode;
         this.expressionMap.lockVersion = lockVersion;
+        this.expressionMap.lockTables = lockTables;
         return this;
-
     }
 
     /**
@@ -1664,13 +1659,26 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
      */
     protected createLockExpression(): string {
         const driver = this.connection.driver;
+
+        let lockTablesClause = "";
+
+        if (this.expressionMap.lockTables) {
+            if (!(driver instanceof PostgresDriver)) {
+                throw new Error("Lock tables not supported in selected driver");
+            }
+            if (this.expressionMap.lockTables.length < 1) {
+                throw new Error("lockTables cannot be an empty array");
+            }
+            lockTablesClause = " OF " + this.expressionMap.lockTables.join(", ");
+        }
+
         switch (this.expressionMap.lockMode) {
             case "pessimistic_read":
                 if (driver instanceof MysqlDriver || driver instanceof AuroraDataApiDriver) {
                     return " LOCK IN SHARE MODE";
 
                 } else if (driver instanceof PostgresDriver) {
-                    return " FOR SHARE";
+                    return " FOR SHARE" + lockTablesClause;
 
                 } else if (driver instanceof OracleDriver) {
                     return " FOR UPDATE";
@@ -1682,8 +1690,12 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                     throw new LockNotSupportedOnGivenDriverError();
                 }
             case "pessimistic_write":
-                if (driver instanceof MysqlDriver || driver instanceof AuroraDataApiDriver || driver instanceof PostgresDriver || driver instanceof OracleDriver) {
+                if (driver instanceof MysqlDriver || driver instanceof AuroraDataApiDriver || driver instanceof OracleDriver) {
                     return " FOR UPDATE";
+
+                }
+                else if (driver instanceof PostgresDriver ) {
+                    return " FOR UPDATE" + lockTablesClause;
 
                 } else if (driver instanceof SqlServerDriver) {
                     return "";
@@ -1692,22 +1704,29 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                     throw new LockNotSupportedOnGivenDriverError();
                 }
             case "pessimistic_partial_write":
-                if (driver instanceof PostgresDriver || driver instanceof MysqlDriver) {
+                if (driver instanceof PostgresDriver) {
+                    return " FOR UPDATE" + lockTablesClause + " SKIP LOCKED";
+
+                } else if (driver instanceof MysqlDriver) {
                     return " FOR UPDATE SKIP LOCKED";
 
                 } else {
                     throw new LockNotSupportedOnGivenDriverError();
                 }
             case "pessimistic_write_or_fail":
-                if (driver instanceof PostgresDriver || driver instanceof MysqlDriver) {
+                if (driver instanceof PostgresDriver) {
+                    return " FOR UPDATE" + lockTablesClause + " NOWAIT";
+
+                } else if (driver instanceof MysqlDriver) {
                     return " FOR UPDATE NOWAIT";
+
                 } else {
                     throw new LockNotSupportedOnGivenDriverError();
                 }
 
             case "for_no_key_update":
                 if (driver instanceof PostgresDriver) {
-                    return " FOR NO KEY UPDATE";
+                    return " FOR NO KEY UPDATE" + lockTablesClause;
                 } else {
                     throw new LockNotSupportedOnGivenDriverError();
                 }
