@@ -4,7 +4,7 @@ import { Broker } from "./Broker";
 
 @Entity()
 export class Order {
-  
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -12,7 +12,7 @@ export class Order {
   orderReferenceNumber: string;
 
   @ManyToOne(
-    (type) => Broker,
+    () => Broker,
     (broker) => broker.orders,
     {
       cascade: false,
@@ -22,7 +22,7 @@ export class Order {
   company?: Broker;
 
   @OneToOne(
-    (type) => OrderCustomer,
+    () => OrderCustomer,
     (orderCustomer) => orderCustomer.order,
     {
       cascade: ["insert", "update"],
@@ -32,7 +32,7 @@ export class Order {
   )
   @JoinColumn({ name: "orderCustomerId" })
   orderCustomer?: OrderCustomer;
-  
+
   @Column({ type: "int", nullable: true })
   orderCustomerId?: number;
 

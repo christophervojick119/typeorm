@@ -2,59 +2,43 @@ import "reflect-metadata";
 import {createTestingConnections, closeTestingConnections, reloadTestingDatabases} from "../../utils/test-utils";
 import {Connection} from "../../../src/connection/Connection";
 import {expect} from "chai";
-import {PostgresDriver} from "../../../src/driver/postgres/PostgresDriver";
 import { Order } from "./entity/Order";
 import { OrderCustomer } from "./entity/OrderCustomer";
 import { OrderRepository } from "./repository/OrderRepository";
 import { Broker } from "./entity/Broker";
 import { BrokerRepository } from "./repository/BrokerRepository";
 
-describe("github issues > #3246", () => {
+describe("github issues > #3246 Saving an entity with a 1:1 cascading insert does not return id if entity has nullable many:one relationship", () => {
 
     let connections: Connection[];
-
     before(async () => connections = await createTestingConnections({
         entities: [Order, OrderCustomer, Broker],
+        enabledDrivers: ["postgres"],
         schemaCreate: true,
         dropSchema: true,
     }));
 
     beforeEach(() => reloadTestingDatabases(connections));
-
     after(() => closeTestingConnections(connections));
 
-    let company = new Broker();
-    company.name = "Acme Inc.";
-
-    let order = new Order();
-    order.orderReferenceNumber = "abcd";
-
-    const orderCustomer = new OrderCustomer();
-    orderCustomer.name = "Dave";
-
-    order.orderCustomer = orderCustomer;
-
     it("should insert and return the order with id", () => Promise.all(connections.map(async connection => {
-      try {
-         if (connection.driver instanceof PostgresDriver) {
+        let company = new Broker();
+        company.name = "Acme Inc.";
 
-            const myCompanyRepository = connection.manager.getCustomRepository(BrokerRepository);
+        let order = new Order();
+        order.orderReferenceNumber = "abcd";
 
-            const createdCompany = await myCompanyRepository.createBroker(company);
+        const orderCustomer = new OrderCustomer();
+        orderCustomer.name = "Dave";
+        order.orderCustomer = orderCustomer;
 
-            const myOrderRepository = connection.manager.getCustomRepository(OrderRepository);
+        const myCompanyRepository = connection.manager.getCustomRepository(BrokerRepository);
+        const createdCompany = await myCompanyRepository.createBroker(company);
+        const myOrderRepository = connection.manager.getCustomRepository(OrderRepository);
+        order.company = createdCompany;
 
-            order.company = createdCompany;
+        const result = await myOrderRepository.createOrder(order);
 
-            const result = await myOrderRepository.createOrder(order);
-
-            expect(result.id).not.to.be.undefined;
-
-        }
-      } catch (err) {
-
-        throw new Error(err);
-
-      }
-     })));
+        expect(result.id).not.to.be.undefined;
+    })));
  });
