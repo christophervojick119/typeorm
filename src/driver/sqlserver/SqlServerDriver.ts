@@ -765,6 +765,15 @@ export class SqlServerDriver implements Driver {
 
         credentials = Object.assign({}, credentials, DriverUtils.buildDriverOptions(credentials)); // todo: do it better way
 
+        // todo: credentials.domain is deprecation. remove it in future
+        const authentication = !credentials.domain ? credentials.authentication : {
+            type: "ntlm",
+            options: {
+                domain: credentials.domain,
+                userName: credentials.username,
+                password: credentials.password
+            }
+        };
         // build connection options for the driver
         const connectionOptions = Object.assign({}, {
             connectionTimeout: this.options.connectionTimeout,
@@ -774,11 +783,11 @@ export class SqlServerDriver implements Driver {
             options: this.options.options,
         }, {
             server: credentials.host,
-            user: credentials.username,
-            password: credentials.password,
             database: credentials.database,
             port: credentials.port,
-            domain: credentials.domain,
+            user: credentials.username,
+            password: credentials.password,
+            authentication: authentication,
         }, options.extra || {});
 
         // set default useUTC option if it hasn't been set
