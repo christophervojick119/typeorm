@@ -1527,7 +1527,7 @@ export class CockroachQueryRunner extends BaseQueryRunner implements QueryRunner
                             tableColumn.isGenerated = true;
                             tableColumn.generationStrategy = "uuid";
 
-                        } else {
+                        } else  {
                             tableColumn.default = dbColumn["column_default"].replace(/:::.*/, "");
                             tableColumn.default = tableColumn.default.replace(/^(-?[\d\.]+)$/, "($1)");
                         }

@@ -1679,6 +1679,8 @@ export class PostgresQueryRunner extends BaseQueryRunner implements QueryRunner 
                         } else if (dbColumn["column_default"] === "gen_random_uuid()" || /^uuid_generate_v\d\(\)/.test(dbColumn["column_default"])) {
                             tableColumn.isGenerated = true;
                             tableColumn.generationStrategy = "uuid";
+                        } else if (dbColumn["column_default"] === "now()" || dbColumn["column_default"].indexOf("'now'::text") !== -1) {
+                            tableColumn.default = dbColumn["column_default"]
                         } else {
                             tableColumn.default = dbColumn["column_default"].replace(/::.*/, "");
                             tableColumn.default = tableColumn.default.replace(/^(-?\d+)$/, "'$1'");

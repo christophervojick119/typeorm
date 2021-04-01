@@ -750,7 +750,8 @@ export class PostgresDriver implements Driver {
             return defaultValue === true ? "true" : "false";
 
         } else if (typeof defaultValue === "function") {
-            return defaultValue();
+            const value = defaultValue();
+            return this.normalizeDatetimeFunction(value)
 
         } else if (typeof defaultValue === "object") {
             return `'${JSON.stringify(defaultValue)}'`;
@@ -903,7 +904,6 @@ export class PostgresDriver implements Driver {
             //     console.log("comment:", tableColumn.comment, columnMetadata.comment);
             //     console.log("enumName:", tableColumn.enumName, columnMetadata.enumName);
             //     console.log("enum:", tableColumn.enum && columnMetadata.enum && !OrmUtils.isArraysEqual(tableColumn.enum, columnMetadata.enum.map(val => val + "")));
-            //     console.log("onUpdate:", tableColumn.onUpdate, columnMetadata.onUpdate);
             //     console.log("isPrimary:", tableColumn.isPrimary, columnMetadata.isPrimary);
             //     console.log("isNullable:", tableColumn.isNullable, columnMetadata.isNullable);
             //     console.log("isUnique:", tableColumn.isUnique, this.normalizeIsUnique(columnMetadata));
@@ -1067,6 +1067,43 @@ export class PostgresDriver implements Driver {
                 ok(result);
             });
         });
+    }
+
+    /**
+     * If parameter is a datetime function, e.g. "CURRENT_TIMESTAMP", normalizes it.
+     * Otherwise returns original input.
+     */
+    protected normalizeDatetimeFunction(value: string) {
+        // check if input is datetime function
+        const upperCaseValue = value.toUpperCase()
+        const isDatetimeFunction = upperCaseValue.indexOf("CURRENT_TIMESTAMP") !== -1
+            || upperCaseValue.indexOf("CURRENT_DATE") !== -1
+            || upperCaseValue.indexOf("CURRENT_TIME") !== -1
+            || upperCaseValue.indexOf("LOCALTIMESTAMP") !== -1
+            || upperCaseValue.indexOf("LOCALTIME") !== -1;
+
+        if (isDatetimeFunction) {
+            // extract precision, e.g. "(3)"
+            const precision = value.match(/\(\d+\)/)
+
+            if (upperCaseValue.indexOf("CURRENT_TIMESTAMP") !== -1) {
+                return precision ? `('now'::text)::timestamp${precision[0]} with time zone` : "now()";
+
+            } else if (upperCaseValue === "CURRENT_DATE") {
+                return "('now'::text)::date"
+
+            } else if (upperCaseValue.indexOf("CURRENT_TIME") !== -1) {
+                return precision ? `('now'::text)::time${precision[0]} with time zone` : "('now'::text)::time with time zone"
+
+            } else if (upperCaseValue.indexOf("LOCALTIMESTAMP") !== -1) {
+                return precision ? `('now'::text)::timestamp${precision[0]} without time zone` : "('now'::text)::timestamp without time zone"
+
+            } else if (upperCaseValue.indexOf("LOCALTIME") !== -1) {
+                return precision ? `('now'::text)::time${precision[0]} without time zone` : "('now'::text)::time without time zone"
+            }
+        }
+
+        return value
     }
 
 }
