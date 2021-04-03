@@ -1,5 +1,5 @@
 import {Driver} from "./Driver";
-import { hash } from "../util/StringUtils";
+import {hash,shorten} from "../util/StringUtils";
 
 /**
  * Common driver utility functions.
@@ -55,26 +55,41 @@ export class DriverUtils {
         return Object.assign({}, options);
     }
 
+
     /**
-     * Builds column alias from given alias name and column name.
+     * Joins and shortens alias if needed.
      *
-     * If alias length is greater than the limit (if any) allowed by the current
-     * driver, replaces it with a hashed string.
+     * If the alias length is greater than the limit allowed by the current
+     * driver, replaces it with a shortend string, if the shortend string
+     * is still too long, it will then hash the alias.
      *
      * @param driver Current `Driver`.
-     * @param alias Alias part.
-     * @param column Name of the column to be concatened to `alias`.
+     * @param buildOptions Optional settings.
+     * @param alias Alias parts.
      *
-     * @return An alias allowing to select/transform the target `column`.
+     * @return An alias that is no longer than the divers max alias length.
      */
-    static buildColumnAlias({ maxAliasLength }: Driver, alias: string, column: string): string {
-        const columnAliasName = alias + "_" + column;
-
-        if (maxAliasLength && maxAliasLength > 0 && columnAliasName.length > maxAliasLength) {
-            return hash(columnAliasName, { length: maxAliasLength });
+     static buildAlias({ maxAliasLength }: Driver, buildOptions: { shorten?: boolean, joiner?: string } | string, ...alias: string[]): string {
+        if (typeof buildOptions === "string") {
+            alias.unshift(buildOptions);
+            buildOptions = { shorten: false, joiner: "_" };
+        } else {
+            buildOptions = Object.assign({ shorten: false, joiner: "_" }, buildOptions);
         }
 
-        return columnAliasName;
+        const newAlias = alias.length === 1 ? alias[0] : alias.join(buildOptions.joiner);
+        if (maxAliasLength && maxAliasLength > 0 && newAlias.length > maxAliasLength) {
+            if (buildOptions.shorten === true) {
+                const shortenedAlias = shorten(newAlias);
+                if (shortenedAlias.length < maxAliasLength) {
+                    return shortenedAlias;
+                }
+            }
+
+            return hash(newAlias, { length: maxAliasLength });
+        }
+
+        return newAlias;
     }
 
     // -------------------------------------------------------------------------
