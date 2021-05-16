@@ -1464,7 +1464,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
 
         if (maxExecutionTime > 0) {
             if (driver instanceof MysqlDriver) {
-                select += ` /*+ MAX_EXECUTION_TIME(${ this.expressionMap.maxExecutionTime }) */`;
+                select += `/*+ MAX_EXECUTION_TIME(${ this.expressionMap.maxExecutionTime }) */ `;
             }
         }
 
@@ -2094,7 +2094,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
         let savedQueryResultCacheOptions: QueryResultCacheOptions|undefined = undefined;
         let cacheError = false;
         if (this.connection.queryResultCache && (this.expressionMap.cache || cacheOptions.alwaysEnabled)) {
-            try {            
+            try {
                 savedQueryResultCacheOptions = await this.connection.queryResultCache.getFromCache({
                     identifier: this.expressionMap.cacheId,
                     query: queryId,
@@ -2107,7 +2107,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                     throw error;
                 }
                 cacheError = true;
-            }            
+            }
         }
 
         const results = await queryRunner.query(sql, parameters);
@@ -2125,7 +2125,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                 if (!cacheOptions.ignoreErrors) {
                     throw error;
                 }
-            }            
+            }
         }
 
         return results;
