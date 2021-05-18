@@ -1304,6 +1304,10 @@ export class SqlServerQueryRunner extends BaseQueryRunner implements QueryRunner
      */
     async createForeignKey(tableOrName: Table|string, foreignKey: TableForeignKey): Promise<void> {
         const table = tableOrName instanceof Table ? tableOrName : await this.getCachedTable(tableOrName);
+        const metadata = this.connection.hasMetadata(table.name) ? this.connection.getMetadata(table.name) : undefined;
+
+        if (metadata && metadata.treeParentRelation && metadata.treeParentRelation!.isTreeParent && metadata.foreignKeys.find(foreignKey => foreignKey.onDelete !== "NO ACTION"))
+            throw new Error("SqlServer does not support options in TreeParent.");
 
         // new FK may be passed without name. In this case we generate FK name manually.
         if (!foreignKey.name)

@@ -148,7 +148,7 @@ export class JunctionEntityMetadataBuilder {
                 referencedEntityMetadata: relation.entityMetadata,
                 columns: junctionColumns,
                 referencedColumns: referencedColumns,
-                onDelete: relation.onDelete ||  "CASCADE"
+                onDelete: relation.onDelete || "CASCADE"
             }),
             new ForeignKeyMetadata({
                 entityMetadata: entityMetadata,
