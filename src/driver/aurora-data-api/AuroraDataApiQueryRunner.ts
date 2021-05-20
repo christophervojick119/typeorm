@@ -1339,7 +1339,7 @@ export class AuroraDataApiQueryRunner extends BaseQueryRunner implements QueryRu
                             tableColumn.scale = parseInt(dbColumn["NUMERIC_SCALE"]);
                     }
 
-                    if (tableColumn.type === "enum" || tableColumn.type === "simple-enum") {
+                    if (tableColumn.type === "enum" || tableColumn.type === "simple-enum" || tableColumn.type === "set") {
                         const colType = dbColumn["COLUMN_TYPE"];
                         const items = colType.substring(colType.indexOf("(") + 1, colType.lastIndexOf(")")).split(",");
                         tableColumn.enum = (items as string[]).map(item => {
