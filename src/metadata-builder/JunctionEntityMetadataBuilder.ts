@@ -7,6 +7,7 @@ import {IndexMetadata} from "../metadata/IndexMetadata";
 import {JoinTableMetadataArgs} from "../metadata-args/JoinTableMetadataArgs";
 import {RelationMetadata} from "../metadata/RelationMetadata";
 import {AuroraDataApiDriver} from "../driver/aurora-data-api/AuroraDataApiDriver";
+import {OracleDriver} from "../driver/oracle/OracleDriver";
 
 /**
  * Creates EntityMetadata for junction tables.
@@ -142,6 +143,7 @@ export class JunctionEntityMetadataBuilder {
         entityMetadata.ownColumns.forEach(column => column.relationMetadata = relation);
 
         // create junction table foreign keys
+        // Note: UPDATE CASCADE clause is not supported in Oracle.
         entityMetadata.foreignKeys = relation.createForeignKeyConstraints ? [
             new ForeignKeyMetadata({
                 entityMetadata: entityMetadata,
@@ -149,7 +151,7 @@ export class JunctionEntityMetadataBuilder {
                 columns: junctionColumns,
                 referencedColumns: referencedColumns,
                 onDelete: relation.onDelete || "CASCADE",
-                onUpdate: relation.onUpdate || "CASCADE"
+                onUpdate: relation.onUpdate || this.connection.driver instanceof OracleDriver ? "NO ACTION" : "CASCADE",
             }),
             new ForeignKeyMetadata({
                 entityMetadata: entityMetadata,
@@ -157,7 +159,8 @@ export class JunctionEntityMetadataBuilder {
                 columns: inverseJunctionColumns,
                 referencedColumns: inverseReferencedColumns,
                 onDelete: relation.inverseRelation ? relation.inverseRelation.onDelete : "CASCADE",
-                onUpdate: relation.inverseRelation ? relation.inverseRelation.onUpdate : "CASCADE",
+                onUpdate: relation.inverseRelation ? relation.inverseRelation.onUpdate :
+                    this.connection.driver instanceof OracleDriver ? "NO ACTION" : "CASCADE",
             }),
         ] : [];
 
