@@ -151,7 +151,7 @@ export class JunctionEntityMetadataBuilder {
                 columns: junctionColumns,
                 referencedColumns: referencedColumns,
                 onDelete: relation.onDelete || "CASCADE",
-                onUpdate: relation.onUpdate || this.connection.driver instanceof OracleDriver ? "NO ACTION" : "CASCADE",
+                onUpdate: this.connection.driver instanceof OracleDriver ? "NO ACTION" : relation.onUpdate || "CASCADE",
             }),
             new ForeignKeyMetadata({
                 entityMetadata: entityMetadata,
@@ -159,8 +159,11 @@ export class JunctionEntityMetadataBuilder {
                 columns: inverseJunctionColumns,
                 referencedColumns: inverseReferencedColumns,
                 onDelete: relation.inverseRelation ? relation.inverseRelation.onDelete : "CASCADE",
-                onUpdate: relation.inverseRelation ? relation.inverseRelation.onUpdate :
-                    this.connection.driver instanceof OracleDriver ? "NO ACTION" : "CASCADE",
+                onUpdate: this.connection.driver instanceof OracleDriver
+                    ? "NO ACTION"
+                    : relation.inverseRelation
+                        ? relation.inverseRelation.onUpdate
+                        : "CASCADE",
             }),
         ] : [];
 
