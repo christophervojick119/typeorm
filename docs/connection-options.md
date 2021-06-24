@@ -203,6 +203,8 @@ See [SSL options](https://github.com/mysqljs/mysql#ssl-options).
 
 * `driver` - The capacitor-sqlite instance. For example, `new SQLiteConnection(CapacitorSQLite)`.
 
+* `journalMode` - The SQLite journal mode (optional)
+
 ## `cordova` connection options
 
 * `database` - Database name
