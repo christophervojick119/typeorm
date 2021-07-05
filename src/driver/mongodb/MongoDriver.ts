@@ -167,6 +167,7 @@ export class MongoDriver implements Driver {
         "w",
         "wtimeout",
         "j",
+        "writeConcern",
         "forceServerObjectId",
         "serializeFunctions",
         "ignoreUndefined",
