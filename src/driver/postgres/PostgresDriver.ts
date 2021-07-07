@@ -308,8 +308,9 @@ export class PostgresDriver implements Driver {
     async afterConnect(): Promise<void> {
         const extensionsMetadata = await this.checkMetadataForExtensions();
 
-        if (extensionsMetadata.hasExtensions) {
-            return new Promise<void>((ok, fail) => {
+        const installExtensions = this.options.installExtensions === undefined || this.options.installExtensions;
+        if (installExtensions && extensionsMetadata.hasExtensions) {
+                       return new Promise<void>((ok, fail) => {
                 this.master.connect(async (err: any, connection: any, release: Function) => {
                     await this.enableExtensions(extensionsMetadata, connection);
                     if (err) return fail(err);
@@ -1093,6 +1094,7 @@ export class PostgresDriver implements Driver {
      */
     protected executeQuery(connection: any, query: string) {
         return new Promise((ok, fail) => {
+            this.connection.logger.logQuery(query);
             connection.query(query, (err: any, result: any) => {
                 if (err) return fail(err);
                 ok(result);
