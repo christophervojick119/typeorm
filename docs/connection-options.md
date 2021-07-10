@@ -209,6 +209,10 @@ See [SSL options](https://github.com/mysqljs/mysql#ssl-options).
 
 * `driver` - The capacitor-sqlite instance. For example, `new SQLiteConnection(CapacitorSQLite)`.
 
+* `mode` - Set the mode for database encryption: "no-encryption" | "encryption" | "secret" | "newsecret"
+
+* `version` - Database version
+
 * `journalMode` - The SQLite journal mode (optional)
 
 ## `cordova` connection options
