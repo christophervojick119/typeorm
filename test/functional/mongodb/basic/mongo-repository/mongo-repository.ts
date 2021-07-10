@@ -86,6 +86,26 @@ describe("mongodb > MongoRepository", () => {
         loadedPosts[0].text.should.be.equal("Everything about post #1");
 
     })));
+  
+    it("should be able to use findByIds with both objectId and strings", () => Promise.all(connections.map(async connection => {
+        const postRepository = connection.getMongoRepository(Post);
+
+        // save few posts
+        const firstPost = new Post();
+        firstPost.title = "Post #1";
+        firstPost.text = "Everything about post #1";
+        await postRepository.save(firstPost);
+
+        const secondPost = new Post();
+        secondPost.title = "Post #2";
+        secondPost.text = "Everything about post #2";
+        await postRepository.save(secondPost);
+
+        expect(await postRepository.findByIds([ firstPost.id ])).to.have.length(1);
+        expect(await postRepository.findByIds([ firstPost.id.toHexString() ])).to.have.length(1);
+        expect(await postRepository.findByIds([ { id: firstPost.id } ])).to.have.length(1);
+        expect(await postRepository.findByIds([ undefined ])).to.have.length(0);
+    })));
 
     // todo: cover other methods as well
     it("should be able to save and update mongo entities", () => Promise.all(connections.map(async connection => {
