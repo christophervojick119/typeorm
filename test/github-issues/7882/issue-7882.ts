@@ -5,7 +5,7 @@ import { closeTestingConnections, createTestingConnections, reloadTestingDatabas
 import { Example } from "./entity/Example";
 import { ExampleText } from "./entity/ExampleText";
 
-describe.only("github issues > #7882  .findOne reduces relations to an empty array", () => {
+describe("github issues > #7882  .findOne reduces relations to an empty array", () => {
 
     let connections: Connection[];
     before(async () => {
