@@ -1,3 +1,20 @@
+## [0.2.36](https://github.com/typeorm/typeorm/compare/0.2.35...0.2.36) (2021-07-31)
+
+
+### Bug Fixes
+
+* add deprecated `WhereExpression` alias for `WhereExpressionBuilder` ([#7980](https://github.com/typeorm/typeorm/issues/7980)) ([76e7ed9](https://github.com/typeorm/typeorm/commit/76e7ed943779b940212c4e453d97028b5ffed7d0))
+* always generate migrations with template string literals ([#7971](https://github.com/typeorm/typeorm/issues/7971)) ([e9c2af6](https://github.com/typeorm/typeorm/commit/e9c2af610a1c9a632605b71d67b97e048be2e29e))
+* use js rather than ts in all `browser` package manifests ([#7982](https://github.com/typeorm/typeorm/issues/7982)) ([0d90bcd](https://github.com/typeorm/typeorm/commit/0d90bcdc8c77f2080aa200fe9f4f962b7b01c9ee))
+* use nvarchar/ntext during transit for SQLServer queries ([#7933](https://github.com/typeorm/typeorm/issues/7933)) ([62d7976](https://github.com/typeorm/typeorm/commit/62d79762dbfe58219a5673ba4d404fe9f2e40436))
+
+
+### Features
+
+* add postgres connection option `applicationName` ([#7989](https://github.com/typeorm/typeorm/issues/7989)) ([d365acc](https://github.com/typeorm/typeorm/commit/d365acca68069d0bd9acea5b45a73d7f4c1f4d8f))
+
+
+
 ## [0.2.35](https://github.com/typeorm/typeorm/compare/0.2.34...0.2.35) (2021-07-28)
 
 ### Bug Fixes
