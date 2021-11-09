@@ -216,6 +216,7 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
                 subscribers: options && options.subscribers ? options.subscribers : [],
                 dropSchema: options && options.dropSchema !== undefined ? options.dropSchema : false,
                 cache: options ? options.cache : undefined,
+                logging: process.env.TYPEORM_LOGGING === "1"
             });
             if (options && options.driverSpecific)
                 newOptions = Object.assign({}, options.driverSpecific, newOptions);
