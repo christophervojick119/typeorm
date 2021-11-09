@@ -81,14 +81,11 @@ describe("github issues > #8076 Add relation options to all tree queries (missin
       c4 = await categoryRepo.save(c4);
 
       // Create the sites
-      [s1, s2, s3, s4, s5] =
-        await Promise.all([
-          siteRepo.save(s1),
-          siteRepo.save(s2),
-          siteRepo.save(s3),
-          siteRepo.save(s4),
-          siteRepo.save(s5)
-        ]);
+      await siteRepo.save(s1);
+      await siteRepo.save(s2);
+      await siteRepo.save(s3);
+      await siteRepo.save(s4);
+      await siteRepo.save(s5);
 
       // Create the member relation
       await memberRepo.save(m1);
