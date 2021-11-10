@@ -244,7 +244,6 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
 export async function createTestingConnections(options?: TestingOptions): Promise<Connection[]> {
     const connections = await createConnections(setupTestingConnections(options));
     await Promise.all(connections.map(async connection => {
-        console.log("connection has logging: ", connection.options.logging)
         // create new databases
         const databases: string[] = [];
         connection.entityMetadatas.forEach(metadata => {
