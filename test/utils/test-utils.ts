@@ -215,7 +215,7 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
                 migrations: options && options.migrations ? options.migrations : [],
                 subscribers: options && options.subscribers ? options.subscribers : [],
                 dropSchema: options && options.dropSchema !== undefined ? options.dropSchema : false,
-                cache: options ? options.cache : undefined,
+                cache: options ? options.cache : undefined
             });
             if (options && options.driverSpecific)
                 newOptions = Object.assign({}, options.driverSpecific, newOptions);
