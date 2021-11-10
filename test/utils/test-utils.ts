@@ -216,7 +216,6 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
                 subscribers: options && options.subscribers ? options.subscribers : [],
                 dropSchema: options && options.dropSchema !== undefined ? options.dropSchema : false,
                 cache: options ? options.cache : undefined,
-                logging: process.env.TYPEORM_LOGGING === "1"
             });
             if (options && options.driverSpecific)
                 newOptions = Object.assign({}, options.driverSpecific, newOptions);
@@ -245,6 +244,7 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
 export async function createTestingConnections(options?: TestingOptions): Promise<Connection[]> {
     const connections = await createConnections(setupTestingConnections(options));
     await Promise.all(connections.map(async connection => {
+        console.log("connection has logging: ", connection.options.logging)
         // create new databases
         const databases: string[] = [];
         connection.entityMetadatas.forEach(metadata => {
