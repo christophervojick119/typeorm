@@ -40,7 +40,7 @@ describe("github issues > #7932  non-ascii characters assigned to var/char colum
         entity.content = '💖';
         entity.fixedLengthContent = '🏍';
 
-        expect(repo.save(entity)).to.eventually.be.rejectedWith(Error);
+        await expect(repo.save(entity)).to.eventually.be.rejectedWith(Error);
     })));
 
     it("should not change char or varchar column types to nchar or nvarchar", () => Promise.all(connections.map(async connection => {

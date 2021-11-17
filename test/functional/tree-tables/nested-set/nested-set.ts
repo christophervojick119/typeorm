@@ -1,3 +1,4 @@
+import "../../../utils/test-setup"
 import "reflect-metadata";
 import {Category} from "./entity/Category";
 import {Connection} from "../../../../src/connection/Connection";
@@ -344,7 +345,7 @@ describe("tree tables > nested-set", () => {
         const b1 = new Category();
         b1.name = "b1";
 
-        expect(categoryRepository.save(b1)).to.eventually.throw("Nested sets do not support multiple root entities.");
+        await expect(categoryRepository.save(b1)).to.be.rejectedWith("Nested sets do not support multiple root entities.");
     })));
 
     it("findDescendantsTree() tests > findDescendantsTree should load all category descendents and nested children", () => Promise.all(connections.map(async connection => {
@@ -422,6 +423,7 @@ describe("tree tables > nested-set", () => {
         await categoryRepository.save(a1);
 
         const categoriesTree = await categoryRepository.findDescendantsTree(a1);
+        console.log(categoriesTree)
         categoriesTree.should.be.eql({
             id: a1.id,
             name: "a1",
