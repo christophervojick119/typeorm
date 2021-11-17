@@ -10,6 +10,7 @@ describe("github issues > #7932  non-ascii characters assigned to var/char colum
     before(async () => {
         connections = await createTestingConnections({
             entities: [Example],
+            enabledDrivers: ["mssql"],
             schemaCreate: false,
             dropSchema: true
         });
