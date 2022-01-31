@@ -82,6 +82,11 @@ export class Connection {
     readonly namingStrategy: NamingStrategyInterface;
 
     /**
+     * Name for the metadata table
+     */
+    readonly metadataTableName: string;
+
+    /**
      * Logger used to log orm events.
      */
     readonly logger: Logger;
@@ -122,6 +127,7 @@ export class Connection {
         this.driver = new DriverFactory().create(this);
         this.manager = this.createEntityManager();
         this.namingStrategy = options.namingStrategy || new DefaultNamingStrategy();
+        this.metadataTableName = options.metadataTableName || "typeorm_metadata";
         this.queryResultCache = options.cache ? new QueryResultCacheFactory(this).create() : undefined;
         this.relationLoader = new RelationLoader(this);
         this.isConnected = false;
