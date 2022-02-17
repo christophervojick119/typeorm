@@ -1,3 +1,17 @@
+## [0.2.43](https://github.com/typeorm/typeorm/compare/0.2.42...0.2.43) (2022-02-17)
+
+### Bug Fixes
+
+* support `require` to internal files without explicitly writing `.js` in the path ([#8660](https://github.com/typeorm/typeorm/issues/8660)) ([96aed8a](https://github.com/typeorm/typeorm/commit/96aed8aae06df0ae555aa51ed9f1a5ffec141e61)), closes [#8656](https://github.com/typeorm/typeorm/issues/8656)
+
+### Features
+
+* embedded entities with entity schema ([#8626](https://github.com/typeorm/typeorm/issues/8626)) ([7dbe956](https://github.com/typeorm/typeorm/commit/7dbe956c56da3a430ae6f0e99730e9449deae889)), closes [#3632](https://github.com/typeorm/typeorm/issues/3632)
+
+### Reverts
+
+* Revert "feat: soft delete recursive cascade (#8436)" (#8654) ([6b0b15b](https://github.com/typeorm/typeorm/commit/6b0b15b0e68584ed7cd81a658d8606cfdb96817c)), closes [#8436](https://github.com/typeorm/typeorm/issues/8436) [#8654](https://github.com/typeorm/typeorm/issues/8654)
+
 ## [0.2.42](https://github.com/typeorm/typeorm/compare/0.2.41...0.2.42) (2022-02-16)
 
 ### Bug Fixes
