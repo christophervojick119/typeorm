@@ -24,8 +24,8 @@ describe("github issues > #798 sqlite: 'database' path in ormconfig.json is not 
 
     it("should find the sqlite database if the cwd is changed", async function () {
         // run test only if sqlite3 is enabled in ormconfig
-        const isEnabled = getTypeOrmConfig().some(conf => conf.type === "sqlite" && conf.skip === false)
-        if (!isEnabled) return
+        const isEnabled = getTypeOrmConfig().some(conf => conf.type === "sqlite" && conf.skip === false);
+        if (!isEnabled) return;
 
         const options = await getConnectionOptions("sqlite");
         connection = await createConnection(options);
@@ -35,8 +35,8 @@ describe("github issues > #798 sqlite: 'database' path in ormconfig.json is not 
 
     it("should find the sqlite database if the cwd is changed for better-sqlite3", async function () {
         // run test only if sqlite3 is enabled in ormconfig
-        const isEnabled = getTypeOrmConfig().some(conf => conf.type === "better-sqlite3" && conf.skip === false)
-        if (!isEnabled) return
+        const isEnabled = getTypeOrmConfig().some(conf => conf.type === "better-sqlite3" && conf.skip === false);
+        if (!isEnabled) return;
 
         const options = await getConnectionOptions("better-sqlite3");
         connection = await createConnection(options);
