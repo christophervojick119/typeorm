@@ -10,10 +10,10 @@ export const NameEntitySchema = new EntitySchema<Name>({
     target: Name,
     columns: {
         first: {
-            type: "varchar"
+            type: String
         },
         last: {
-            type: "varchar"
+            type: String
         }
     },
     indices: [

@@ -11,12 +11,12 @@ export const UserEntitySchema = new EntitySchema<User>({
     name: 'user',
     columns: {
         id: {
+            type: Number,
             primary: true,
-            generated: "uuid",
-            type: "uuid"
+            generated: true
         },
         isActive: {
-            type: "boolean"
+            type: Boolean
         }
     },
     embeddeds: {
