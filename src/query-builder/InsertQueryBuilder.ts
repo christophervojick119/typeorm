@@ -17,8 +17,8 @@ import {BroadcasterResult} from "../subscriber/BroadcasterResult";
 import {EntitySchema} from "../entity-schema/EntitySchema";
 import {OracleDriver} from "../driver/oracle/OracleDriver";
 import {AuroraDataApiDriver} from "../driver/aurora-data-api/AuroraDataApiDriver";
-import { TypeORMError } from "../error";
-import { v4 as uuidv4 } from "uuid";
+import {TypeORMError} from "../error";
+import {v4 as uuidv4} from "uuid";
 
 /**
  * Allows to build complex sql queries in a fashion way and execute those queries.
@@ -244,8 +244,9 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
     returning(returning: string|string[]): this {
 
         // not all databases support returning/output cause
-        if (!this.connection.driver.isReturningSqlSupported())
+        if (!this.connection.driver.isReturningSqlSupported("insert")) {
             throw new ReturningStatementNotSupportedError();
+        }
 
         this.expressionMap.returning = returning;
         return this;
@@ -316,12 +317,15 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
     protected createInsertExpression() {
         const tableName = this.getTableName(this.getMainTableName());
         const valuesExpression = this.createValuesExpression(); // its important to get values before returning expression because oracle rely on native parameters and ordering of them is important
-        const returningExpression = (this.connection.driver instanceof OracleDriver && this.getValueSets().length > 1) ? null : this.createReturningExpression(); // oracle doesnt support returning with multi-row insert
+        const returningExpression =
+            (this.connection.driver instanceof OracleDriver && this.getValueSets().length > 1)
+                ? null
+                : this.createReturningExpression("insert"); // oracle doesnt support returning with multi-row insert
         const columnsExpression = this.createColumnNamesExpression();
         let query = "INSERT ";
 
         if (this.connection.driver instanceof MysqlDriver || this.connection.driver instanceof AuroraDataApiDriver) {
-          query += `${this.expressionMap.onIgnore ? " IGNORE " : ""}`;
+            query += `${this.expressionMap.onIgnore ? " IGNORE " : ""}`;
         }
 
         query += `INTO ${tableName}`;
@@ -400,7 +404,13 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
         }
 
         // add RETURNING expression
-        if (returningExpression && (this.connection.driver instanceof PostgresDriver || this.connection.driver instanceof OracleDriver || this.connection.driver instanceof CockroachDriver)) {
+        if (
+            returningExpression &&
+            (this.connection.driver instanceof PostgresDriver ||
+                this.connection.driver instanceof OracleDriver ||
+                this.connection.driver instanceof CockroachDriver ||
+                this.connection.driver instanceof MysqlDriver)
+        ) {
             query += ` RETURNING ${returningExpression}`;
         }
 
@@ -504,7 +514,7 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
 
                     if (!(value instanceof Function)) {
                       // make sure our value is normalized by a driver
-                      value = this.connection.driver.preparePersistentValue(value, column);
+                        value = this.connection.driver.preparePersistentValue(value, column);
                     }
 
                     // newly inserted entities always have a version equal to 1 (first version)
@@ -584,9 +594,9 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
                             }
                         } else if (this.connection.driver instanceof PostgresDriver && this.connection.driver.spatialTypes.indexOf(column.type) !== -1) {
                             if (column.srid != null) {
-                              expression += `ST_SetSRID(ST_GeomFromGeoJSON(${paramName}), ${column.srid})::${column.type}`;
+                                expression += `ST_SetSRID(ST_GeomFromGeoJSON(${paramName}), ${column.srid})::${column.type}`;
                             } else {
-                              expression += `ST_GeomFromGeoJSON(${paramName})::${column.type}`;
+                                expression += `ST_GeomFromGeoJSON(${paramName})::${column.type}`;
                             }
                         } else if (this.connection.driver instanceof SqlServerDriver && this.connection.driver.spatialTypes.indexOf(column.type) !== -1) {
                             expression += column.type + "::STGeomFromText(" + paramName + ", " + (column.srid || "0") + ")";
