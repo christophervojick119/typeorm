@@ -1,3 +1,19 @@
+## [0.2.44](https://github.com/typeorm/typeorm/compare/0.2.43...0.2.44) (2022-02-23)
+
+### Bug Fixes
+
+* alter relation loader to use transforms when present ([#8691](https://github.com/typeorm/typeorm/issues/8691)) ([2c2fb29](https://github.com/typeorm/typeorm/commit/2c2fb29a67bfd0ca7dd9133a2f85f5b4db5fb195)), closes [#8690](https://github.com/typeorm/typeorm/issues/8690)
+* cannot read properties of undefined (reading 'joinEagerRelations') ([136015b](https://github.com/typeorm/typeorm/commit/136015b04ee72b0ca2439fbff53b1467c12c24b6))
+* expo driver doesn't work properly because of new beforeMigration() afterMigration() callbacks ([#8683](https://github.com/typeorm/typeorm/issues/8683)) ([5a71803](https://github.com/typeorm/typeorm/commit/5a7180378e34ab58ad40c504ebc5195e2413c5f4))
+* ng webpack default import ([#8688](https://github.com/typeorm/typeorm/issues/8688)) ([2d3374b](https://github.com/typeorm/typeorm/commit/2d3374b3b4cb8163764c035bd687b2c81787f338)), closes [#8674](https://github.com/typeorm/typeorm/issues/8674)
+* support imports of absolute paths of ESM files on Windows ([#8669](https://github.com/typeorm/typeorm/issues/8669)) ([12cbfcd](https://github.com/typeorm/typeorm/commit/12cbfcde7bc4f56069ed3298064bb91ad0816bf0)), closes [#8651](https://github.com/typeorm/typeorm/issues/8651)
+
+### Features
+
+* add option to upsert to skip update if the row already exists and no values would be changed  ([#8679](https://github.com/typeorm/typeorm/issues/8679)) ([8744395](https://github.com/typeorm/typeorm/commit/87443954b59768ab77fb15097ea9d88822b4a733))
+* allow `{delete,insert}().returning()` on MariaDB ([#8673](https://github.com/typeorm/typeorm/issues/8673)) ([7facbab](https://github.com/typeorm/typeorm/commit/7facbabd2663098156a53983ea38433ed39082d2)), closes [#7235](https://github.com/typeorm/typeorm/issues/7235) [#7235](https://github.com/typeorm/typeorm/issues/7235)
+* Implement deferrable foreign keys for SAP HANA ([#6104](https://github.com/typeorm/typeorm/issues/6104)) ([1f54c70](https://github.com/typeorm/typeorm/commit/1f54c70b76de34d4420904b72137df746ea9aaed))
+
 ## [0.2.43](https://github.com/typeorm/typeorm/compare/0.2.42...0.2.43) (2022-02-17)
 
 ### Bug Fixes
