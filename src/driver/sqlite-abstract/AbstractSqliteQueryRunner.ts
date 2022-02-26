@@ -1,6 +1,5 @@
 import {QueryRunner} from "../../query-runner/QueryRunner";
 import {ObjectLiteral} from "../../common/ObjectLiteral";
-import {TransactionAlreadyStartedError} from "../../error/TransactionAlreadyStartedError";
 import {TransactionNotStartedError} from "../../error/TransactionNotStartedError";
 import {TableColumn} from "../../schema-builder/table/TableColumn";
 import {ColumnMetadata} from "../../metadata/ColumnMetadata";
@@ -18,7 +17,7 @@ import {OrmUtils} from "../../util/OrmUtils";
 import {TableCheck} from "../../schema-builder/table/TableCheck";
 import {IsolationLevel} from "../types/IsolationLevel";
 import {TableExclusion} from "../../schema-builder/table/TableExclusion";
-import { TypeORMError } from "../../error";
+import {TransactionAlreadyStartedError, TypeORMError} from "../../error";
 import {MetadataTableType} from "../types/MetadataTableType";
 
 /**
@@ -34,6 +33,8 @@ export abstract class AbstractSqliteQueryRunner extends BaseQueryRunner implemen
      * Database driver used by connection.
      */
     driver: AbstractSqliteDriver;
+
+    protected transactionPromise: Promise<any> | null = null;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -69,25 +70,36 @@ export abstract class AbstractSqliteQueryRunner extends BaseQueryRunner implemen
      * Starts transaction.
      */
     async startTransaction(isolationLevel?: IsolationLevel): Promise<void> {
-        if (this.isTransactionActive)
+        if (this.driver.transactionSupport === "none")
+            throw new TypeORMError(`Transactions aren't supported by ${this.connection.driver.options.type}.`);
+
+        if (this.isTransactionActive && this.driver.transactionSupport === "simple")
             throw new TransactionAlreadyStartedError();
 
-        if (isolationLevel) {
-            if (isolationLevel !== "READ UNCOMMITTED" && isolationLevel !== "SERIALIZABLE") {
-                throw new TypeORMError(`SQLite only supports SERIALIZABLE and READ UNCOMMITTED isolation`);
-            }
+        if (isolationLevel && isolationLevel !== "READ UNCOMMITTED" && isolationLevel !== "SERIALIZABLE")
+            throw new TypeORMError(`SQLite only supports SERIALIZABLE and READ UNCOMMITTED isolation`);
 
-            if (isolationLevel === "READ UNCOMMITTED") {
-                await this.query("PRAGMA read_uncommitted = true");
-            } else {
-                await this.query("PRAGMA read_uncommitted = false");
-            }
+        this.isTransactionActive = true;
+        try {
+            await this.broadcaster.broadcast('BeforeTransactionStart');
+        } catch (err) {
+            this.isTransactionActive = false;
+            throw err;
         }
 
-        await this.broadcaster.broadcast('BeforeTransactionStart');
-        this.isTransactionActive = true;
-
-        await this.query("BEGIN TRANSACTION");
+        if (this.transactionDepth === 0) {
+            if (isolationLevel) {
+                if (isolationLevel === "READ UNCOMMITTED") {
+                    await this.query("PRAGMA read_uncommitted = true");
+                } else {
+                    await this.query("PRAGMA read_uncommitted = false");
+                }
+            }
+            await this.query("BEGIN TRANSACTION");
+        } else {
+            await this.query(`SAVEPOINT typeorm_${this.transactionDepth}`);
+        }
+        this.transactionDepth += 1;
 
         await this.broadcaster.broadcast('AfterTransactionStart');
     }
@@ -102,8 +114,13 @@ export abstract class AbstractSqliteQueryRunner extends BaseQueryRunner implemen
 
         await this.broadcaster.broadcast('BeforeTransactionCommit');
 
-        await this.query("COMMIT");
-        this.isTransactionActive = false;
+        if (this.transactionDepth > 1) {
+            await this.query(`RELEASE SAVEPOINT typeorm_${this.transactionDepth - 1}`);
+        } else {
+            await this.query("COMMIT");
+            this.isTransactionActive = false;
+        }
+        this.transactionDepth -= 1;
 
         await this.broadcaster.broadcast('AfterTransactionCommit');
     }
@@ -118,9 +135,13 @@ export abstract class AbstractSqliteQueryRunner extends BaseQueryRunner implemen
 
         await this.broadcaster.broadcast('BeforeTransactionRollback');
 
-        await this.query("ROLLBACK");
-
-        this.isTransactionActive = false;
+        if (this.transactionDepth > 1) {
+            await this.query(`ROLLBACK TO SAVEPOINT typeorm_${this.transactionDepth - 1}`);
+        } else {
+            await this.query("ROLLBACK");
+            this.isTransactionActive = false;
+        }
+        this.transactionDepth -= 1;
 
         await this.broadcaster.broadcast('AfterTransactionRollback');
     }

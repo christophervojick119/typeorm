@@ -49,6 +49,11 @@ export interface Driver {
     treeSupport: boolean;
 
     /**
+     * Represent transaction support by this driver
+     */
+    transactionSupport: "simple" | "nested" | "none";
+
+    /**
      * Gets list of supported column data types by a driver.
      */
     supportedDataTypes: ColumnType[];
