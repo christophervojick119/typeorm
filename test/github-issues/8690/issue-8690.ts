@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { createTestingConnections, closeTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
 import { Connection } from "../../../src/connection/Connection";
 import { expect } from "chai";
-import { getRepository } from "../../../src";
 import { User, Photo } from "./entity/entities";
 
 describe("github issues > #8690 Relations do not render primary key column values correctly when transformers present", () => {
