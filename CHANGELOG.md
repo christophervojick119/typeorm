@@ -1,4 +1,4 @@
-## [0.3.0]() (2022-03-10)
+## [0.3.0](https://github.com/typeorm/typeorm/pull/8616) (2022-03-17)
 
 Changes in the version includes changes from the `next` branch and `typeorm@next` version.
 They were pending their migration from 2018. Finally, they are in the master branch and master version.
