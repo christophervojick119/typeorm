@@ -1,3 +1,19 @@
+## [0.3.1](https://github.com/typeorm/typeorm/compare/0.3.0...0.3.1) (2022-03-21)
+
+### Bug Fixes
+
+* bugfixes introduced in 0.3.0 ([#8764](https://github.com/typeorm/typeorm/issues/8764)) ([d61f857](https://github.com/typeorm/typeorm/commit/d61f857ce9447a25d074810759fd5c4aad9a08e3)), closes [#8762](https://github.com/typeorm/typeorm/issues/8762) [#8759](https://github.com/typeorm/typeorm/issues/8759) [#8758](https://github.com/typeorm/typeorm/issues/8758) [#8757](https://github.com/typeorm/typeorm/issues/8757)
+
+### Features
+
+* new array find operators (`ArrayContains`, `ArrayContainedBy`, `ArrayOverlap`) ([#8766](https://github.com/typeorm/typeorm/issues/8766)) ([9f1b8e3](https://github.com/typeorm/typeorm/commit/9f1b8e3425739a871c2d0ad84ddd6e7456117f7f)):
+
+### BREAKING CHANGES
+
+* we do not call JSON.stringify() to json/jsonb column types in Postgres. Instead, we delegate value directly to underlying pg driver. This is a correct way of handling jsons.
+* array: true must be explicitly defined for array json/jsonb values
+* strings being JSON-stringified must be manually escaped
+
 ## [0.3.0](https://github.com/typeorm/typeorm/pull/8616) (2022-03-17)
 
 Changes in the version includes changes from the `next` branch and `typeorm@next` version.
