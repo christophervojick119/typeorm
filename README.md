@@ -661,6 +661,7 @@ import { DataSource } from "typeorm"
 import { Photo } from "./entity/Photo"
 import { AppDataSource } from "./index"
 
+const photoRepository = AppDataSource.getRepository(Photo)
 const allPhotos = await photoRepository.find()
 console.log("All photos from the db: ", allPhotos)
 
