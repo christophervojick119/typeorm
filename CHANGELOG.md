@@ -1,3 +1,18 @@
+## [0.3.2](https://github.com/typeorm/typeorm/compare/0.3.1...0.3.2) (2022-03-22)
+
+### Bug Fixes
+
+* broken CLI in ESM projects since version 0.3.0 ([#8773](https://github.com/typeorm/typeorm/issues/8773)) ([97699e8](https://github.com/typeorm/typeorm/commit/97699e816e03867efe595f620ceb152af91f9f56))
+
+### Features
+
+* add typeorm CLI variations that include `ts-node` ([#8776](https://github.com/typeorm/typeorm/issues/8776)) ([05fc744](https://github.com/typeorm/typeorm/commit/05fc74446988d100052f46e2dbf61c6cc2999b99))
+* allows user to specify which mysql package should be used ([#8771](https://github.com/typeorm/typeorm/issues/8771)) ([35106df](https://github.com/typeorm/typeorm/commit/35106dfe78a92783abca7d06307ab9106ae536bc))
+
+### Reverts
+
+* json/jsonb change introduced in 0.3.1 ([#8777](https://github.com/typeorm/typeorm/issues/8777)) ([edf27d9](https://github.com/typeorm/typeorm/commit/edf27d97a30d1aaf28e5c7a7aab96d16152e4983))
+
 ## [0.3.1](https://github.com/typeorm/typeorm/compare/0.3.0...0.3.1) (2022-03-21)
 
 ### Bug Fixes
@@ -441,13 +456,6 @@ This change was required to simplify ORM internals and introduce new features.
 * find by Date object in sqlite driver ([#7538](https://github.com/typeorm/typeorm/pull/7538))
 
 * issue with non-reliable `new Date(ISOString)` parsing ([#7796](https://github.com/typeorm/typeorm/pull/7796))
-
-* true JSON / JSONB support - manual `JSON.stringify` was removed,
-instead object handled by underlying driver. This opens ability to properly work with json/jsonb structures,
-but brings few breaking changes:
-
-  * `array: true` must be explicitly defined for array json/jsonb values
-  * strings being JSON-stringified must be manually escaped
 
 ### DEPRECATIONS
 
