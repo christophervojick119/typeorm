@@ -1,3 +1,14 @@
+## [0.3.3](https://github.com/typeorm/typeorm/compare/0.3.2...0.3.3) (2022-03-23)
+
+### Bug Fixes
+
+* improve initialization of custom repository ([#8782](https://github.com/typeorm/typeorm/issues/8782)) ([52a641c](https://github.com/typeorm/typeorm/commit/52a641ca7ce8e4b168155b5043d1e9289c694fc7))
+* resolve entities correctly in datasource when globs are specified ([#8778](https://github.com/typeorm/typeorm/issues/8778)) ([a641c5d](https://github.com/typeorm/typeorm/commit/a641c5dff86df683b84e14873e88011013258f87))
+
+### Features
+
+* support for Common Table Expressions ([#8534](https://github.com/typeorm/typeorm/issues/8534)) ([7cc1848](https://github.com/typeorm/typeorm/commit/7cc1848fd4a44aefa986026ee659ed872ea6ab8f)), closes [#1116](https://github.com/typeorm/typeorm/issues/1116) [#5899](https://github.com/typeorm/typeorm/issues/5899) [#4753](https://github.com/typeorm/typeorm/issues/4753)
+
 ## [0.3.2](https://github.com/typeorm/typeorm/compare/0.3.1...0.3.2) (2022-03-22)
 
 ### Bug Fixes
