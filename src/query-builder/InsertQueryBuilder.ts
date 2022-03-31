@@ -336,6 +336,15 @@ export class InsertQueryBuilder<Entity> extends QueryBuilder<Entity> {
 
     /**
      * @deprecated
+     * 
+     * `.orUpdate({ columns: [ "is_updated" ] }).setParameter("is_updated", value)`
+     * 
+     * is now `.orUpdate(["is_updated"])`
+     * 
+     * `.orUpdate({ conflict_target: ['date'], overwrite: ['title'] })`
+     * 
+     * is now `.orUpdate(['title'], ['date'])`
+     * 
      */
     orUpdate(statement?: {
         columns?: string[]
