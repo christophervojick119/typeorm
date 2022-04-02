@@ -1,10 +1,10 @@
 import "reflect-metadata"
 import {
-    createTestingConnections,
     closeTestingConnections,
+    createTestingConnections,
     reloadTestingDatabases,
 } from "../../utils/test-utils"
-import { DataSource } from "../../../src/data-source/index"
+import { DataSource } from "../../../src"
 import { expect } from "chai"
 import { Content } from "./entity/Content"
 import { Photo } from "./entity/Photo"
@@ -19,6 +19,7 @@ describe("github issues > #2927 When using base class' custom repository, the di
                 entities: [__dirname + "/entity/*{.js,.ts}"],
                 schemaCreate: true,
                 dropSchema: true,
+                enabledDrivers: ["postgres"],
             })),
     )
     beforeEach(() => reloadTestingDatabases(dataSources))
