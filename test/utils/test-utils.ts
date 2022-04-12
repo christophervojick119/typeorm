@@ -13,7 +13,6 @@ import { QueryResultCache } from "../../src/cache/QueryResultCache"
 import path from "path"
 import { ObjectUtils } from "../../src/util/ObjectUtils"
 import { EntitySubscriberMetadataArgs } from "../../src/metadata-args/EntitySubscriberMetadataArgs"
-import { v4 as uuidv4 } from "uuid"
 
 /**
  * Interface in which data is stored in ormconfig.json of the project.
@@ -300,45 +299,56 @@ export function setupTestingConnections(
         })
 }
 
-export function createDataSource(options: DataSourceOptions): DataSource {
-    class GeneratedColumnReplacerSubscriber
-        implements EntitySubscriberInterface
-    {
-        static globalIncrementValues: { [entityName: string]: number } = {}
-        beforeInsert(event: InsertEvent<any>): Promise<any> | void {
-            event.metadata.generatedColumns.map((column) => {
-                if (column.generationStrategy === "increment") {
-                    if (
-                        !GeneratedColumnReplacerSubscriber
-                            .globalIncrementValues[event.metadata.tableName]
-                    ) {
-                        GeneratedColumnReplacerSubscriber.globalIncrementValues[
-                            event.metadata.tableName
-                        ] = 0
-                    }
+class GeneratedColumnReplacerSubscriber implements EntitySubscriberInterface {
+    static globalIncrementValues: { [entityName: string]: number } = {}
+    beforeInsert(event: InsertEvent<any>): Promise<any> | void {
+        event.metadata.columns.map((column) => {
+            if (column.generationStrategy === "increment") {
+                if (
+                    !GeneratedColumnReplacerSubscriber.globalIncrementValues[
+                        event.metadata.tableName
+                    ]
+                ) {
                     GeneratedColumnReplacerSubscriber.globalIncrementValues[
                         event.metadata.tableName
-                    ] += 1
-
-                    column.setEntityValue(
-                        event.entity,
-                        GeneratedColumnReplacerSubscriber.globalIncrementValues[
-                            event.metadata.tableName
-                        ],
-                    )
-                } else if (column.generationStrategy === "uuid") {
-                    column.setEntityValue(event.entity, uuidv4())
+                    ] = 0
                 }
-            })
-        }
+                GeneratedColumnReplacerSubscriber.globalIncrementValues[
+                    event.metadata.tableName
+                ] += 1
+
+                column.setEntityValue(
+                    event.entity,
+                    GeneratedColumnReplacerSubscriber.globalIncrementValues[
+                        event.metadata.tableName
+                    ],
+                )
+            } else if (
+                (column.isCreateDate || column.isUpdateDate) &&
+                !column.getEntityValue(event.entity)
+            ) {
+                column.setEntityValue(event.entity, new Date())
+            } else if (
+                !column.isCreateDate &&
+                !column.isUpdateDate &&
+                !column.isVirtual &&
+                column.default !== undefined &&
+                column.getEntityValue(event.entity) === undefined
+            ) {
+                column.setEntityValue(event.entity, column.default)
+            }
+        })
     }
+}
+getMetadataArgsStorage().entitySubscribers.push({
+    target: GeneratedColumnReplacerSubscriber,
+} as EntitySubscriberMetadataArgs)
 
-    // todo: uncomment later
-    if (options.type === ("spanner" as any)) {
-        getMetadataArgsStorage().entitySubscribers.push({
-            target: GeneratedColumnReplacerSubscriber,
-        } as EntitySubscriberMetadataArgs)
-
+export function createDataSource(options: DataSourceOptions): DataSource {
+    if (options.type === "spanner") {
+        process.env.SPANNER_EMULATOR_HOST = "localhost:9010"
+        // process.env.GOOGLE_APPLICATION_CREDENTIALS =
+        //     "/Users/messer/Documents/google/typeorm-spanner-3b57e071cbf0.json"
         if (Array.isArray(options.subscribers)) {
             options.subscribers.push(
                 GeneratedColumnReplacerSubscriber as Function,
@@ -479,6 +489,7 @@ export function closeTestingConnections(connections: DataSource[]) {
  * Reloads all databases for all given connections.
  */
 export function reloadTestingDatabases(connections: DataSource[]) {
+    GeneratedColumnReplacerSubscriber.globalIncrementValues = {}
     return Promise.all(
         connections.map((connection) => connection.synchronize(true)),
     )

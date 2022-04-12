@@ -35,7 +35,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -56,7 +57,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -87,7 +89,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -371,7 +374,8 @@ describe("query builder > locking", () => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
                     connection.driver.options.type === "cockroachdb" ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -414,7 +418,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -433,7 +438,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return
 
@@ -789,7 +795,8 @@ describe("query builder > locking", () => {
             connections.map(async (connection) => {
                 if (
                     DriverUtils.isSQLiteFamily(connection.driver) ||
-                    connection.driver.options.type === "sap"
+                    connection.driver.options.type === "sap" ||
+                    connection.driver.options.type === "spanner"
                 )
                     return connection.manager.transaction((entityManager) => {
                         return Promise.all([
