@@ -5,6 +5,7 @@ import { TableColumn } from "../../../src/schema-builder/table/TableColumn"
 import {
     closeTestingConnections,
     createTestingConnections,
+    createTypeormMetadataTable,
 } from "../../utils/test-utils"
 import { DriverUtils } from "../../../src/driver/DriverUtils"
 import { PostgresDriver } from "../../../src/driver/postgres/PostgresDriver"
@@ -156,6 +157,11 @@ describe("query runner > add column", () => {
                     }
 
                     if (isMySQL || isSpanner || postgresSupported) {
+                        // create typeorm_metadata table manually
+                        await createTypeormMetadataTable(
+                            connection.driver,
+                            queryRunner,
+                        )
                         await queryRunner.addColumn(table!, column3)
                         table = await queryRunner.getTable("post")
                         column3 = table!.findColumnByName("textAndTag")!

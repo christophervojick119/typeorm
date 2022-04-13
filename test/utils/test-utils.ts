@@ -2,12 +2,15 @@ import {
     DatabaseType,
     DataSource,
     DataSourceOptions,
+    Driver,
     EntitySchema,
     EntitySubscriberInterface,
     getMetadataArgsStorage,
     InsertEvent,
     Logger,
     NamingStrategyInterface,
+    QueryRunner,
+    Table,
 } from "../../src"
 import { QueryResultCache } from "../../src/cache/QueryResultCache"
 import path from "path"
@@ -513,4 +516,73 @@ export function sleep(ms: number): Promise<void> {
     return new Promise<void>((ok) => {
         setTimeout(ok, ms)
     })
+}
+
+/**
+ * Creates typeorm service table for storing user defined Views and generate columns.
+ */
+export async function createTypeormMetadataTable(
+    driver: Driver,
+    queryRunner: QueryRunner,
+) {
+    const schema = driver.schema
+    const database = driver.database
+    const typeormMetadataTable = driver.buildTableName(
+        "typeorm_metadata",
+        schema,
+        database,
+    )
+
+    await queryRunner.createTable(
+        new Table({
+            database: database,
+            schema: schema,
+            name: typeormMetadataTable,
+            columns: [
+                {
+                    name: "type",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataType,
+                    }),
+                    isNullable: false,
+                },
+                {
+                    name: "database",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataDatabase,
+                    }),
+                    isNullable: true,
+                },
+                {
+                    name: "schema",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataSchema,
+                    }),
+                    isNullable: true,
+                },
+                {
+                    name: "table",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataTable,
+                    }),
+                    isNullable: true,
+                },
+                {
+                    name: "name",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataName,
+                    }),
+                    isNullable: true,
+                },
+                {
+                    name: "value",
+                    type: driver.normalizeType({
+                        type: driver.mappedDataTypes.metadataValue,
+                    }),
+                    isNullable: true,
+                },
+            ],
+        }),
+        true,
+    )
 }

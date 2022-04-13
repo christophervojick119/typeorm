@@ -15,7 +15,6 @@ import { TableCheck } from "./table/TableCheck"
 import { TableExclusion } from "./table/TableExclusion"
 import { View } from "./view/View"
 import { ViewUtils } from "./util/ViewUtils"
-import { PostgresDriver } from "../driver/postgres/PostgresDriver"
 import { DriverUtils } from "../driver/DriverUtils"
 
 /**
@@ -116,16 +115,14 @@ export class RdbmsSchemaBuilder implements SchemaBuilder {
     }
 
     /**
-     * If the schema contains views, create the typeorm_metadata table if it doesn't exist yet
+     * Create the typeorm_metadata table if necessary.
      */
     async createMetadataTableIfNecessary(
         queryRunner: QueryRunner,
     ): Promise<void> {
         if (
             this.viewEntityToSyncMetadatas.length > 0 ||
-            (this.connection.driver.options.type === "postgres" &&
-                (this.connection.driver as PostgresDriver)
-                    .isGeneratedColumnsSupported)
+            this.hasGeneratedColumns()
         ) {
             await this.createTypeormMetadataTable(queryRunner)
         }
@@ -193,6 +190,15 @@ export class RdbmsSchemaBuilder implements SchemaBuilder {
                 // sort views in creation order by dependencies
                 .sort(ViewUtils.viewMetadataCmp)
         )
+    }
+
+    /**
+     * Checks if there are at least one generated column.
+     */
+    protected hasGeneratedColumns(): boolean {
+        return this.connection.entityMetadatas.some((entityMetadata) => {
+            return entityMetadata.columns.some((column) => column.generatedType)
+        })
     }
 
     /**
@@ -1174,7 +1180,7 @@ export class RdbmsSchemaBuilder implements SchemaBuilder {
     }
 
     /**
-     * Creates typeorm service table for storing user defined Views.
+     * Creates typeorm service table for storing user defined Views and generate columns.
      */
     protected async createTypeormMetadataTable(queryRunner: QueryRunner) {
         const schema = this.currentSchema
