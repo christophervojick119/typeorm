@@ -1,4 +1,4 @@
-## [0.3.7](https://github.com/typeorm/typeorm/compare/0.3.5...0.3.7) (2022-06-29)
+## [0.3.7](https://github.com/typeorm/typeorm/compare/0.3.6...0.3.7) (2022-06-29)
 
 ### Bug Fixes
 
