@@ -1332,9 +1332,11 @@ export abstract class AbstractSqliteQueryRunner
                               dbTable["database"],
                           )}.${dbTable["name"]}`
                         : dbTable["name"]
-                const table = new Table({ name: tablePath })
 
                 const sql = dbTable["sql"]
+
+                const withoutRowid = sql.includes("WITHOUT ROWID")
+                const table = new Table({ name: tablePath, withoutRowid })
 
                 // load columns and indices
                 const [dbColumns, dbIndices, dbForeignKeys]: ObjectLiteral[][] =
@@ -1828,11 +1830,7 @@ export abstract class AbstractSqliteQueryRunner
 
         sql += `)`
 
-        const tableMetadata = this.connection.entityMetadatas.find(
-            (metadata) =>
-                this.getTablePath(table) === this.getTablePath(metadata),
-        )
-        if (tableMetadata && tableMetadata.withoutRowid) {
+        if (table.withoutRowid) {
             sql += " WITHOUT ROWID"
         }
 
