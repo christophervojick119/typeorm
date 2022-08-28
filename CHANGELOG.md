@@ -1,3 +1,7 @@
+## [0.3.9](https://github.com/typeorm/typeorm/compare/0.3.7...0.3.9) (2022-08-28)
+
+* fixed regression introduced in 0.3.8 - broken CLI because of #8917 ([#9332](https://github.com/typeorm/typeorm/issues/9332)), closes [#9330](https://github.com/typeorm/typeorm/issues/9330)
+
 ## [0.3.8](https://github.com/typeorm/typeorm/compare/0.3.7...0.3.8) (2022-08-26)
 
 ### Bug Fixes
