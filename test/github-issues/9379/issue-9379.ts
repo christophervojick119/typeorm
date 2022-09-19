@@ -9,7 +9,7 @@ import {
 import { SuperLongTableName } from "./entity/SuperLongTableName"
 import { SuperLongTableNameWhichIsRelatedToOriginalTable } from "./entity/SuperLongTableNameIsRelatedToOriginal"
 
-describe.only("github issues > #9379 RelationIdLoader is not respecting maxAliasLength", () => {
+describe("github issues > #9379 RelationIdLoader is not respecting maxAliasLength", () => {
     let connections: DataSource[]
     before(
         async () =>
