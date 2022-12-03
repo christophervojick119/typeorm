@@ -952,7 +952,7 @@ export class EntityManager {
     /**
      * Checks whether any entity exists with the given condition
      */
-    exists<Entity>(
+    exists<Entity extends ObjectLiteral>(
         entityClass: EntityTarget<Entity>,
         options?: FindManyOptions<Entity>,
     ): Promise<boolean> {
