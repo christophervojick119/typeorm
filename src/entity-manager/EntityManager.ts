@@ -727,6 +727,9 @@ export class EntityManager {
                     skipUpdateIfNoValuesChanged:
                         options.skipUpdateIfNoValuesChanged,
                     indexPredicate: options.indexPredicate,
+                    upsertType:
+                        options.upsertType ||
+                        this.connection.driver.supportedUpsertTypes[0],
                 },
             )
             .execute()

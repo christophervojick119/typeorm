@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { expect } from "chai"
-import { DataSource, Point } from "../../../../src"
+import { DataSource, Point } from "../../../../src/index"
 import {
     closeTestingConnections,
     createTestingConnections,
@@ -8,12 +8,12 @@ import {
 } from "../../../utils/test-utils"
 import { Post } from "./entity/Post"
 
-describe("spatial-postgres", () => {
+describe("spatial-cockroachdb", () => {
     let connections: DataSource[]
     before(async () => {
         connections = await createTestingConnections({
             entities: [__dirname + "/entity/*{.js,.ts}"],
-            enabledDrivers: ["postgres"],
+            enabledDrivers: ["cockroachdb"],
         })
     })
     beforeEach(async () => {
@@ -33,7 +33,7 @@ describe("spatial-postgres", () => {
         }
     })
 
-    it("should create correct schema with Postgres' geometry type", () =>
+    it("should create correct schema with geometry type", () =>
         Promise.all(
             connections.map(async (connection) => {
                 const queryRunner = connection.createQueryRunner()
@@ -53,7 +53,7 @@ describe("spatial-postgres", () => {
             }),
         ))
 
-    it("should create correct schema with Postgres' geography type", () =>
+    it("should create correct schema with geography type", () =>
         Promise.all(
             connections.map(async (connection) => {
                 const queryRunner = connection.createQueryRunner()
@@ -70,7 +70,7 @@ describe("spatial-postgres", () => {
             }),
         ))
 
-    it("should create correct schema with Postgres' geometry indices", () =>
+    it("should create correct schema with geometry indices", () =>
         Promise.all(
             connections.map(async (connection) => {
                 const queryRunner = connection.createQueryRunner()

@@ -1324,6 +1324,21 @@ export class SelectQueryBuilder<Entity extends ObjectLiteral>
     }
 
     /**
+     * Enables time travelling for the current query (only supported by cockroach currently)
+     */
+    timeTravelQuery(timeTravelFn?: string | boolean): this {
+        if (this.connection.driver.options.type === "cockroachdb") {
+            if (timeTravelFn === undefined) {
+                this.expressionMap.timeTravel = "follower_read_timestamp()"
+            } else {
+                this.expressionMap.timeTravel = timeTravelFn
+            }
+        }
+
+        return this
+    }
+
+    /**
      * Sets ORDER BY condition in the query builder.
      * If you had previously ORDER BY expression defined,
      * calling this function will override previously set ORDER BY conditions.
@@ -3385,13 +3400,26 @@ export class SelectQueryBuilder<Entity extends ObjectLiteral>
                 },
             )
 
+            const originalQuery = this.clone()
+
+            // preserve original timeTravel value since we set it to "false" in subquery
+            const originalQueryTimeTravel =
+                originalQuery.expressionMap.timeTravel
+
             rawResults = await new SelectQueryBuilder(
                 this.connection,
                 queryRunner,
             )
                 .select(`DISTINCT ${querySelects.join(", ")}`)
                 .addSelect(selects)
-                .from(`(${this.clone().orderBy().getQuery()})`, "distinctAlias")
+                .from(
+                    `(${originalQuery
+                        .orderBy()
+                        .timeTravelQuery(false) // set it to "false" since time travel clause must appear at the very end and applies to the entire SELECT clause.
+                        .getQuery()})`,
+                    "distinctAlias",
+                )
+                .timeTravelQuery(originalQueryTimeTravel)
                 .offset(this.expressionMap.skip)
                 .limit(this.expressionMap.take)
                 .orderBy(orderBys)
